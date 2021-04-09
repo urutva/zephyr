@@ -35,3 +35,5 @@ target_link_libraries(app PRIVATE tfm_ipc_psa_api)
 
 # Link in veneer function locations
 target_link_libraries(${ZEPHYR_CURRENT_LIBRARY} PRIVATE ${VENEERS_FILE})
+
+zephyr_include_directories(${APPLICATION_SOURCE_DIR}/src/tls_config)
