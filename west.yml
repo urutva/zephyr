@@ -212,7 +212,7 @@ manifest:
         - debug
     - name: trusted-firmware-m
       path: modules/tee/tfm
-      revision: c74be3890c9d975976fde1b1a3b2f5742bec34c0
+      revision: pull/55/head
       groups:
         - tee
 
