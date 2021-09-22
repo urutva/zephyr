@@ -28,6 +28,7 @@ void main(void)
 	uint8_t hash[PSA_HASH_SIZE(PSA_ALG_SHA_256)] = { 0 };
 	size_t hash_len;
 	psa_status_t status;
+	uint8_t lsm303_data[6] = {0};
 
 	/* Initialise the logger subsys and dump the current buffer. */
 	log_init();
@@ -56,6 +57,28 @@ void main(void)
 
 	/* Display the SHA-256 hash */
 	sf_hex_tabulate_16(&main_fmt, hash, (size_t)(PSA_HASH_SIZE(PSA_ALG_SHA_256)));
+
+	while(true) {
+		LOG_INF("Reading LSM303");
+		al_dump_log();
+
+		status = al_psa_status(
+			example_read_lsm303(lsm303_data,
+								sizeof(lsm303_data)),
+			__func__);
+
+		if (status != PSA_SUCCESS) {
+			LOG_ERR("Failed to get values from LSM303");
+			goto err;
+		}
+
+		LOG_INF("LSM303 magnetometer values: ");
+		LOG_INF("mag_x: %x", (uint16_t)((lsm303_data[0] << 8) | lsm303_data[1]));
+		LOG_INF("mag_y: %x", (uint16_t)((lsm303_data[4] << 8) | lsm303_data[5]));
+		LOG_INF("mag_z: %x", (uint16_t)((lsm303_data[2] << 8) | lsm303_data[3]));
+
+		k_msleep(2000);
+	}
 
 err:
 	/* Dump any queued log messages, and wait for system events. */
