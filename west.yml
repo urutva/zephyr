@@ -211,8 +211,9 @@ manifest:
       groups:
         - debug
     - name: trusted-firmware-m
+      url: https://github.com/urutva
       path: modules/tee/tfm
-      revision: pull/55/head
+      revision: b252bc83c67192224e447ae062a835b5bdd60072
       groups:
         - tee
 
