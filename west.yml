@@ -212,10 +212,10 @@ manifest:
       path: modules/debug/TraceRecorder
       groups:
         - debug
-    - name: trusted-firmware-m
+    - name: zephyr-trusted-firmware-m
       remote: urutva
       path: modules/tee/tfm
-      revision: b252bc83c67192224e447ae062a835b5bdd60072
+      revision: b2d63329ab8e632c084edc6089752a828fb3ccde
       groups:
         - tee
 
