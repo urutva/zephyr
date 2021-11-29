@@ -26,7 +26,8 @@ target_sources(app
                 src/psa_crypto.c
                 src/util_app_log.c
                 src/util_sformat.c
-                src/tfm_secure_provisioning_api.c)
+                src/tfm_secure_provisioning_api.c
+                src/http.c)
 
 target_include_directories(app PRIVATE
   ${ZEPHYR_TRUSTED_FIRMWARE_M_MODULE_DIR}/interface/include

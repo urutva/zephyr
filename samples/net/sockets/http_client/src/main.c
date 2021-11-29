@@ -14,7 +14,7 @@ LOG_MODULE_REGISTER(net_http_client_sample, LOG_LEVEL_DBG);
 
 #include "ca_certificate.h"
 
-#define HTTP_PORT 8000
+#define HTTP_PORT 1443
 #define HTTPS_PORT 4443
 
 #if defined(CONFIG_NET_CONFIG_PEER_IPV6_ADDR)

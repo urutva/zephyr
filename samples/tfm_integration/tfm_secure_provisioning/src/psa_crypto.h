@@ -17,7 +17,8 @@ extern "C" {
  * @brief Generates device certificate signing request (CSR) using Mbed TLS
  * X.509 and TF-M crypto service.
  */
-void crp_generate_csr(void);
+psa_status_t crp_generate_csr(unsigned char* json_encoded_csr,
+                                size_t json_encoded_csr_len);
 
 #ifdef __cplusplus
 }

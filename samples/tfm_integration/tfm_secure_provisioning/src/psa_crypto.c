@@ -332,14 +332,14 @@ static int psa_rng_for_mbedtls(void *p_rng,
  * @brief Generates device certificate signing request (CSR) using Mbed TLS
  * X.509 and TF-M crypto service.
  */
-void crp_generate_csr(void)
+psa_status_t crp_generate_csr(unsigned char* json_encoded_csr,
+                                size_t json_encoded_csr_len)
 {
 	psa_status_t status;
 	psa_key_id_t key_slot = 1;
 	psa_key_handle_t key_handle;
 
 	unsigned char output_buf[1024];
-	unsigned char json_encoded_buf[1024];
 	unsigned char uuid[37];
 
 	/* length of CSR subject name is calculated as
@@ -519,7 +519,7 @@ void crp_generate_csr(void)
 	al_dump_log();
 
 	status = json_obj_encode_buf(csr_json_descr, ARRAY_SIZE(csr_json_descr),
-				     &csr_json, json_encoded_buf, sizeof(json_encoded_buf));
+				     &csr_json, json_encoded_csr, json_encoded_csr_len);
 
 	if (status != 0) {
 		LOG_ERR("failed! json_obj_encode_buf returned 0x%04x", status);
@@ -528,11 +528,6 @@ void crp_generate_csr(void)
 
 	LOG_INF("Encoding CSR as json completed");
 	al_dump_log();
-
-	LOG_INF("Certificate Signing Request in JSON:\n");
-	al_dump_log();
-
-	printf("%s\n", json_encoded_buf);
 
 	/* Close the key to free up the volatile slot. */
 	status = al_psa_status(
@@ -547,4 +542,6 @@ err:
 	al_dump_log();
 	mbedtls_x509write_csr_free(&req);
 	mbedtls_pk_free(&pk_key_container);
+
+	return status;
 }
