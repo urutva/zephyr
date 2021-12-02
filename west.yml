@@ -21,6 +21,8 @@ manifest:
   remotes:
     - name: upstream
       url-base: https://github.com/zephyrproject-rtos
+    - name: urutva
+      url-base: https://github.com/urutva
 
   #
   # Please add items below based on alphabetical order
@@ -217,8 +219,9 @@ manifest:
       path: modules/debug/TraceRecorder
       groups:
         - debug
-    - name: trusted-firmware-m
-      revision: 7c88781953ce7146878bd8bd724e175fdbc298c5
+    - name: zephyr-trusted-firmware-m
+      remote: urutva
+      revision: ddcca48ca45da2b13c3a41faec31732bcaa2b978
       path: modules/tee/tf-m/trusted-firmware-m
       groups:
         - tee
