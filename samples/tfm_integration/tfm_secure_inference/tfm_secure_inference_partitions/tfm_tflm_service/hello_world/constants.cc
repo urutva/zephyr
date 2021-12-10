@@ -15,5 +15,10 @@ limitations under the License.
 
 #include "constants.h"
 
+// This constant represents the range of x values our model was trained on,
+// which is from 0 to (2 * Pi). We approximate Pi to avoid requiring additional
+// libraries.
+const float kXrange = 2.f * 3.14159265359f;
+
 // This is a small number so that it's easy to read the logs
 const int kInferencesPerCycle = 20;

@@ -12,18 +12,28 @@
   "type": "APPLICATION-ROT",
   "priority": "NORMAL",
   "entry_point": "tfm_huk_key_derivation_req_mngr_init",
-  "stack_size": "0x800",
+  "stack_size": "0x1000",
 
   # Service definitions for IPC mode.
-  "services" : [{
-    "name": "TFM_HUK_KEY_DERIVATION",
-    "sid": "0xFFFFF001", # Bits [31:12] denote the vendor (change this),
-                         # bits [11:0] are arbitrary at the discretion of the
-                         # vendor.
-    "non_secure_clients": true,
-    "version": 1,
-    "version_policy": "STRICT"
-   }
+  "services" : [
+    {
+      "name": "TFM_HUK_KEY_DERIVATION_EC_KEY",
+      "sid": "0xFFFFF001", # Bits [31:12] denote the vendor (change this),
+                          # bits [11:0] are arbitrary at the discretion of the
+                          # vendor.
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
+    {
+      "name": "TFM_HUK_KEY_DERIVATION_RSA_OEAP_KEY",
+      "sid": "0xFFFFF002", # Bits [31:12] denote the vendor (change this),
+                          # bits [11:0] are arbitrary at the discretion of the
+                          # vendor.
+      "non_secure_clients": true,
+      "version": 1,
+      "version_policy": "STRICT"
+    },
   ],
 
   "dependencies": [

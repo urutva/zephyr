@@ -22,7 +22,8 @@ target_include_directories(tfm_partitions
 
 target_sources(tfm_app_rot_partition_huk_key_derivation
     PRIVATE
-        tfm_huk_key_derivation_service
+        tfm_huk_key_derivation_service.c
+        tfm_huk_key_derivation_service_api.c
 )
 
 # The generated sources
@@ -42,6 +43,7 @@ target_link_libraries(tfm_app_rot_partition_huk_key_derivation
         tfm_secure_api
         psa_interface
         secure_fw
+        tfm_sprt
         platform_s
         tfm_psa_rot_partition_crypto
 )

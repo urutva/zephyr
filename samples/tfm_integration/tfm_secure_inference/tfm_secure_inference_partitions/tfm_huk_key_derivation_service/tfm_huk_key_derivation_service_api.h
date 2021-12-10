@@ -8,16 +8,16 @@
 
 #include "psa/client.h"
 #include "psa_manifest/sid.h"
+#include "psa/crypto.h"
 
 /**
- * \brief Generate UUID
+ * \brief Generate EC Key
  *
- * Generates an UUID based on https://datatracker.ietf.org/doc/html/rfc4122#section-4.4
+ * Generates an EC Key
  *
- * \param[in,out] uuid          Buffer to write UUID
- * \param[in] uuid_size         Size of UUID buffer
+ * \param[in] key_id          Key slot id for persistent key
  *
  * \return A status indicating the success/failure of the operation
  */
-psa_status_t tfm_secure_provisioning_generate_uuid(void *uuid,
-						   size_t uuid_size);
+psa_status_t psa_huk_key_derivation_ec_key(uint8_t *ec_priv_key_data,
+					   size_t ec_priv_key_data_size);

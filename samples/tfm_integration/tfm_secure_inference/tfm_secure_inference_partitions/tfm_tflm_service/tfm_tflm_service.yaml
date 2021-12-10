@@ -36,4 +36,9 @@
       "version_policy": "STRICT"
     },
   ],
+
+  "dependencies": [
+    "TFM_HUK_KEY_DERIVATION_EC_KEY",
+    "TFM_CRYPTO"
+  ]
 }
