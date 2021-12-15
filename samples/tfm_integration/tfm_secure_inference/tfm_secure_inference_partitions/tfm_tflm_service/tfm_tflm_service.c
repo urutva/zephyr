@@ -1,8 +1,7 @@
 /*
- * Copyright (c) 2020, Arm Limited. All rights reserved.
+ * Copyright (c) 2021 Linaro Limited
  *
- * SPDX-License-Identifier: BSD-3-Clause
- *
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 #include <stdint.h>
@@ -17,11 +16,15 @@
 
 #include "constants.h"
 #include "tfm_huk_key_derivation_service_api.h"
+#include "cbor_cose_api.h"
 
 // #include "Driver_I2C.h"
 #include "platform_regs.h"
 
 #include "main_functions.h"
+
+/* Key handle for EC key used for COSE */
+psa_key_handle_t tflm_cose_key_handle = 0;
 
 // /* I2C driver name for LSM303 peripheral */
 // extern ARM_DRIVER_I2C LSM303_DRIVER;
@@ -177,6 +180,8 @@ void tfm_tflm_service_hello(void)
 	psa_msg_t msg;
 
 	float x_value, y_value;
+	uint8_t inf_val_encoded_buf[256];
+	size_t inf_val_encoded_buf_len = 0;
 
 	/* Retrieve the message corresponding to the TFLM hello service signal */
 	status = psa_get(TFM_TFLM_SERVICE_HELLO_SIGNAL, &msg);
@@ -221,6 +226,19 @@ void tfm_tflm_service_hello(void)
 		LOG_INFFMT("[TFLM service] Starting secure inferencing...\r\n");
 		y_value = loop(x_value);
 
+		LOG_INFFMT("[TFLM service] Starting CBOR encoding and COSE signing...\r\n");
+		tflm_inference_value_encode_and_sign(y_value, inf_val_encoded_buf,
+						     sizeof(inf_val_encoded_buf),
+						     &inf_val_encoded_buf_len);
+
+		LOG_INFFMT("[TFLM service] inf_val_encoded_buf_len: %d\r\n", inf_val_encoded_buf_len);
+
+		LOG_INFFMT("CBOR encoded and COSE signed inference value:\n");
+		for (int i = 0; i < inf_val_encoded_buf_len; i++) {
+			LOG_INFFMT("0x%x ", inf_val_encoded_buf[i]);
+		}
+		LOG_INFFMT("\n");
+
 		psa_write(msg.handle, 0, &y_value, sizeof(y_value));
 		status = PSA_SUCCESS;
 		break;
@@ -239,12 +257,11 @@ void tfm_tflm_service_hello(void)
  */
 static void tfm_tflm_cose_create_ec_key(void)
 {
-    psa_status_t status;
-    uint8_t ec_priv_key_data[32];
+	psa_status_t status;
+	uint8_t ec_priv_key_data[32];
 	psa_key_id_t ec_key_id = 1;
-    psa_key_handle_t key_handle;
-    uint8_t data_out[65] = { 0 }; /* EC public key = 65 bytes. */
-    size_t data_len;
+	uint8_t data_out[65] = { 0 }; /* EC public key = 65 bytes. */
+	size_t data_len;
 
 	status = psa_huk_key_derivation_ec_key(ec_priv_key_data, sizeof(ec_priv_key_data));
 
@@ -257,30 +274,30 @@ static void tfm_tflm_cose_create_ec_key(void)
 
 	/* Setup the key's attributes before the creation request. */
 	psa_set_key_id(&key_attributes, ec_key_id);
-	psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN_HASH);
+	psa_set_key_usage_flags(&key_attributes, PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
 	psa_set_key_lifetime(&key_attributes, PSA_KEY_LIFETIME_PERSISTENT);
 	psa_set_key_algorithm(&key_attributes, alg);
 	psa_set_key_type(&key_attributes, key_type);
 
-	status = psa_import_key(&key_attributes, ec_priv_key_data, sizeof(ec_priv_key_data), &key_handle);
+	status = psa_import_key(&key_attributes, ec_priv_key_data, sizeof(ec_priv_key_data), &tflm_cose_key_handle);
 
 	if (status != PSA_SUCCESS) {
 		LOG_ERRFMT("psa_import_key returned: %d \n", status);
 	}
 
-    status = psa_export_public_key(key_handle, data_out, sizeof(data_out), &data_len);
+	status = psa_export_public_key(tflm_cose_key_handle, data_out, sizeof(data_out), &data_len);
 
 	if (status != PSA_SUCCESS) {
 		LOG_ERRFMT("psa_export_public_key returned: %d \n", status);
 	}
 
-    LOG_INFFMT("COSE Elliptic curve public key:\n");
-    for(int i = 0; i < data_len; i++) {
-        LOG_INFFMT("0x%x ", data_out[i]);
-    }
-    LOG_INFFMT("\n");
+	LOG_INFFMT("COSE Elliptic curve public key:\n");
+	for (int i = 0; i < data_len; i++) {
+		LOG_INFFMT("0x%x ", data_out[i]);
+	}
+	LOG_INFFMT("\n");
 
-    status = psa_close_key(key_handle);
+	status = psa_close_key(tflm_cose_key_handle);
 
 	if (status != PSA_SUCCESS) {
 		LOG_ERRFMT("psa_close_key returned: %d \n", status);
@@ -293,6 +310,7 @@ static void tfm_tflm_cose_create_ec_key(void)
 void tfm_tflm_service_req_mngr_init(void)
 {
 	psa_signal_t signals;
+
 	// uint8_t i2c_reg_data[2] = {0};
 	// uint8_t lsm303_init_completed = 1;
 
@@ -329,8 +347,8 @@ void tfm_tflm_service_req_mngr_init(void)
 
 	// LOG_INFFMT("[Example partition] Initialisation of I2C bus completed\r\n");
 
-    /* Create EC key needed by COSE */
-    tfm_tflm_cose_create_ec_key();
+	/* Create EC key needed by COSE */
+	tfm_tflm_cose_create_ec_key();
 
 	/* Tensorflow lite-micro initialisation */
 	setup();
